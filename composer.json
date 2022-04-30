@@ -1,0 +1,56 @@
+{
+  "name": "craftcms/commerce-postfinance",
+  "description": "PostFinance payment gateway for Craft Commerce",
+  "type": "craft-plugin",
+  "keywords": [
+    "postfinance",
+    "commerce",
+    "craftcms",
+    "yii2"
+  ],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "KLARPLAN AG",
+      "homepage": "https://klarplan.ch"
+    }
+  ],
+  "support": {
+    "email": "support@craftcms.com",
+    "issues": "https://github.com/craftcms/commerce-postfinance/issues?state=open",
+    "source": "https://github.com/craftcms/commerce-postfinance",
+    "docs": "https://github.com/craftcms/commerce-postfinance/blob/master/README.md",
+    "rss": "https://github.com/craftcms/commerce-postfinance/commits/master.atom"
+  },
+  "require": {
+    "craftcms/cms": "^3.7.0",
+    "craftcms/commerce": "^3.3",
+    "postfinancecheckout/sdk": "^3.0.1"
+  },
+  "autoload": {
+    "psr-4": {
+       "craft\\commerce\\postfinance\\": "src/"
+    }
+  },
+  "extra": {
+    "name": "PostFinance for Craft Commerce",
+    "handle": "commerce-postfinance"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require-dev": {
+    "craftcms/phpstan": "dev-main",
+    "craftcms/ecs": "dev-main"
+  },
+  "scripts": {
+    "phpstan": "phpstan --memory-limit=1G",
+    "check-cs": "ecs check --ansi",
+    "fix-cs": "ecs check --ansi --fix"
+  },
+  "config": {
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    }
+  }
+}
