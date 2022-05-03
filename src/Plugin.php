@@ -2,7 +2,7 @@
 
 namespace craft\commerce\postfinance;
 
-use craft\commerce\eway\gateways\Gateway;
+use craft\commerce\postfinance\gateways\Gateway;
 use craft\commerce\services\Gateways;
 use craft\events\RegisterComponentTypesEvent;
 use yii\base\Event;
