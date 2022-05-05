@@ -1,0 +1,23 @@
+{% from "_includes/forms" import textField, lightswitchField, autosuggestField %}
+
+{{ autosuggestField({
+  label: "API username"|t('commerce-postfinance'),
+  instructions: "Your postfinance API username."|t('commerce-postfinance'),
+  id: 'apiUsername',
+  class: 'ltr',
+  name: 'apiUsername',
+  suggestEnvVars: true,
+  value: gateway.apiUsername,
+  errors: gateway.getErrors('apiUsername')
+}) }}
+
+{{ autosuggestField({
+  label: "API password"|t('commerce-postfinance'),
+  instructions: "Your postfinance API password."|t('commerce-postfinance'),
+  id: 'apiPassword',
+  class: 'ltr',
+  name: 'apiPassword',
+  suggestEnvVars: true,
+  value: gateway.apiPassword,
+  errors: gateway.getErrors('apiPassword')
+}) }}
