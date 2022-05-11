@@ -1,23 +1,34 @@
 {% from "_includes/forms" import textField, lightswitchField, autosuggestField %}
 
 {{ autosuggestField({
-  label: "API username"|t('commerce-postfinance'),
-  instructions: "Your postfinance API username."|t('commerce-postfinance'),
-  id: 'apiUsername',
+  label: "Spaced Id"|t('commerce-postfinance'),
+  instructions: "Your postfinance space Id."|t('commerce-postfinance'),
+  id: 'spaceId',
   class: 'ltr',
-  name: 'apiUsername',
+  name: 'spaceId',
   suggestEnvVars: true,
-  value: gateway.apiUsername,
-  errors: gateway.getErrors('apiUsername')
+  value: gateway.spaceId,
+  errors: gateway.getErrors('spaceId')
 }) }}
 
 {{ autosuggestField({
-  label: "API password"|t('commerce-postfinance'),
-  instructions: "Your postfinance API password."|t('commerce-postfinance'),
-  id: 'apiPassword',
+  label: "API user id"|t('commerce-postfinance'),
+  instructions: "Your API user Id."|t('commerce-postfinance'),
+  id: 'userId',
   class: 'ltr',
-  name: 'apiPassword',
+  name: 'userId',
   suggestEnvVars: true,
-  value: gateway.apiPassword,
-  errors: gateway.getErrors('apiPassword')
+  value: gateway.userId,
+  errors: gateway.getErrors('userId')
+}) }}
+
+{{ autosuggestField({
+  label: "API secret key"|t('commerce-postfinance'),
+  instructions: "Your API secret Key."|t('commerce-postfinance'),
+  id: 'secretKey',
+  class: 'ltr',
+  name: 'secretKey',
+  suggestEnvVars: true,
+  value: gateway.secretKey,
+  errors: gateway.getErrors('secretKey')
 }) }}
