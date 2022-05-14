@@ -124,39 +124,19 @@ class Gateway extends BaseGateway
         $apiClient = new ApiClient($this->userId, $this->secretKey);
         $transactionService = new TransactionService($apiClient);
         $result = $transactionService->read($this->spaceId, $transaction->reference);
-        $response = new PostfinanceResponse(['id' => $result->getId(), 'status' => $result->getState()]);
+        $status = $result->getState();
+        $startTime = microtime(true);
+        $maxWaitTime = 30;
+
+        while (in_array($status, [TransactionState::AUTHORIZED, TransactionState::COMPLETED]) && microtime(true) <= $startTime + $maxWaitTime) {
+            $result = $transactionService->read($this->spaceId, $transaction->reference);
+            $status = $result->getState();
+            sleep(1);
+        }
+
+        $response = new PostfinanceResponse(['id' => $result->getId(), 'status' => $status]);
         $response->setProcessing(true);
         return $response;
-    }
-
-    public function capture(Transaction $transaction, string $reference): RequestResponseInterface
-    {
-        // To do
-    }
-
-    public function createPaymentSource(BasePaymentForm $sourceData, int $userId): PaymentSource
-    {
-        // To do
-    }
-
-    public function deletePaymentSource($token): bool
-    {
-        // To do
-    }
-
-    public function refund(Transaction $transaction): RequestResponseInterface
-    {
-        // To do
-    }
-
-    public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
-    {
-        // To do
-    }
-
-    public function completeAuthorize(Transaction $transaction): RequestResponseInterface
-    {
-        // To do
     }
 
     /**
@@ -164,7 +144,7 @@ class Gateway extends BaseGateway
      */
     public function processWebHook(): WebResponse
     {
-        // To do
+        // Todo
     }
 
     /**
@@ -172,7 +152,7 @@ class Gateway extends BaseGateway
      */
     public function supportsCapture(): bool
     {
-        // To do
+        return false;
     }
 
     /**
@@ -180,7 +160,7 @@ class Gateway extends BaseGateway
      */
     public function supportsAuthorize(): bool
     {
-        // To do
+        return false;
     }
 
     /**
@@ -188,7 +168,7 @@ class Gateway extends BaseGateway
      */
     public function supportsCompleteAuthorize(): bool
     {
-        // To do
+        return false;
     }
 
     /**
@@ -196,7 +176,7 @@ class Gateway extends BaseGateway
      */
     public function supportsCompletePurchase(): bool
     {
-        // To do
+        return true;
     }
 
     /**
@@ -204,7 +184,7 @@ class Gateway extends BaseGateway
      */
     public function supportsPaymentSources(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -237,5 +217,29 @@ class Gateway extends BaseGateway
     public function supportsWebhooks(): bool
     {
         return true;
+    }
+
+    public function capture(Transaction $transaction, string $reference): RequestResponseInterface
+    {
+    }
+
+    public function createPaymentSource(BasePaymentForm $sourceData, int $userId): PaymentSource
+    {
+    }
+
+    public function deletePaymentSource($token): bool
+    {
+    }
+
+    public function refund(Transaction $transaction): RequestResponseInterface
+    {
+    }
+
+    public function authorize(Transaction $transaction, BasePaymentForm $form): RequestResponseInterface
+    {
+    }
+
+    public function completeAuthorize(Transaction $transaction): RequestResponseInterface
+    {
     }
 }
