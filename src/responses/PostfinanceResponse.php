@@ -3,8 +3,8 @@
 namespace craft\commerce\postfinance\responses;
 
 use craft\commerce\base\RequestResponseInterface;
-use craft\commerce\errors\NotImplementedException;
 use PostFinanceCheckout\Sdk\Model\TransactionState;
+use PostFinanceCheckout\Sdk\Model\RefundState;
 
 class PostfinanceResponse implements RequestResponseInterface
 {
@@ -58,7 +58,7 @@ class PostfinanceResponse implements RequestResponseInterface
      */
     public function isSuccessful(): bool
     {
-        return array_key_exists('status', $this->data) && in_array($this->data['status'], [TransactionState::FULFILL]);
+        return array_key_exists('status', $this->data) && in_array($this->data['status'], [TransactionState::FULFILL, RefundState::SUCCESSFUL]);
     }
 
     /**
@@ -106,7 +106,7 @@ class PostfinanceResponse implements RequestResponseInterface
      */
     public function getTransactionReference(): string
     {
-        if (empty($this->data)) {
+        if (empty($this->data) || empty($this->data['id'])) {
             return '';
         }
 
