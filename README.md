@@ -20,7 +20,7 @@ Open your terminal and run the following commands:
 
 ```bash
 # go to the project directory
-cd /path/to/my-project.test
+cd /path/to/my-project
 
 # tell Composer to load the plugin
 composer require craftcms/commerce-posfinance
