@@ -11,6 +11,7 @@ use craft\commerce\models\Transaction;
 use craft\commerce\records\Transaction as TransactionRecord;
 use craft\commerce\postfinance\responses\PostfinanceResponse;
 use craft\commerce\postfinance\models\PaymentPage;
+use craft\commerce\postfinance\assets\PaymentFormAsset;
 use craft\commerce\Plugin as Commerce;
 use craft\helpers\Json;
 use craft\helpers\UrlHelper;
@@ -63,15 +64,16 @@ class Gateway extends BaseGateway
      */
     public function getPaymentFormHtml(array $params)
     {
-        $params = [
-            'gateway' => $this,
-            'paymentForm' => $this->getPaymentFormModel(),
-        ];
-
         $view = Craft::$app->getView();
 
         $previousMode = $view->getTemplateMode();
         $view->setTemplateMode(View::TEMPLATE_MODE_CP);
+        $view->registerAssetBundle(PaymentFormAsset::class);
+        $url = Craft::$app->assetManager->getPublishedUrl(PaymentFormAsset::ASSETPATH, true);
+        $params = [
+            'paymentForm' => $this->getPaymentFormModel(),
+            'url' => $url,
+        ];
 
         $html = $view->renderTemplate('commerce-postfinance/paymentForm', $params);
         $view->setTemplateMode($previousMode);
