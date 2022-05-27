@@ -1,0 +1,9 @@
+.payment-methods input {
+    width: 50px !important;
+}
+.logo {
+    display: inline;
+    width: 45px;
+    height:25px;
+    object-fit: cover;
+}
