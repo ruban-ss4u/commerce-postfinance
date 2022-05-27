@@ -1,27 +1,34 @@
-<style>
-.payment-methods input {
-    width: 50px !important;
-}
-</style>
 <div class ="payment-methods">
     <ul>
         <li>
-            <input type="radio" id="paymentMethod" name="paymentMethod" value="Credit / Debit Card"/><label>Visa</label>
+            <input type="radio" id="paymentMethod" name="paymentMethod" value="Credit / Debit Card"/>
+            <img class="logo" src="{{url}}/card-icons/mastercard.svg">
+            <label>MasterCard</label>
         </li>
         <li>
-            <input type="radio" id="paymentMethod" name="paymentMethod" value="Credit / Debit Card"/><label>MasterCard</label>
+            <input type="radio" id="paymentMethod" name="paymentMethod" value="Credit / Debit Card"/>
+            <img class="logo" src="{{url}}/card-icons/visa.svg">
+            <label>Visa</label>
         </li>
         <li>
-            <input type="radio" id="paymentMethod" name="paymentMethod" value="TWINT"/><label>Twint</label>
+            <input type="radio" id="paymentMethod" name="paymentMethod" value="TWINT"/>
+            <img class="logo" src="{{url}}/card-icons/twint.svg">
+            <label>Twint</label>
         </li>
         <li>
-            <input type="radio" id="paymentMethod" name="paymentMethod" value="PostFinance Card"/><label>PostFinance Card</label>
+            <input type="radio" id="paymentMethod" name="paymentMethod" value="PostFinance Card"/>
+            <img class="logo" src="{{url}}/card-icons/postfinance-card.svg">
+            <label>PostFinance card</label>
         </li>
         <li>
-            <input type="radio" id="paymentMethod" name="paymentMethod" value="PostFinance E-Finance"/><label>PostFinance E-finance</label>
+            <input type="radio" id="paymentMethod" name="paymentMethod" value="PostFinance E-Finance"/>
+            <img class="logo" src="{{url}}/card-icons/postfinance-e-finance.svg">
+            <label>PostFinance E finance</label>
         </li>
         <li>
-            <input type="radio" id="paymentMethod" name="paymentMethod" value="Invoice"/><label>Rechnung</label>
+            <input type="radio" id="paymentMethod" name="paymentMethod" value="Invoice"/>
+            <img class="logo" src="{{url}}/card-icons/invoice.svg">
+            <label>Rechnung</label>
         </li>
     </ul>
 </div>
