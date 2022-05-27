@@ -6,11 +6,11 @@ use Craft;
 use craft\commerce\base\Gateway as BaseGateway;
 use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\models\payments\BasePaymentForm;
-use craft\commerce\models\payments\OffsitePaymentForm;
 use craft\commerce\models\PaymentSource;
 use craft\commerce\models\Transaction;
 use craft\commerce\records\Transaction as TransactionRecord;
 use craft\commerce\postfinance\responses\PostfinanceResponse;
+use craft\commerce\postfinance\models\PaymentPage;
 use craft\commerce\Plugin as Commerce;
 use craft\helpers\Json;
 use craft\helpers\UrlHelper;
@@ -26,6 +26,12 @@ use PostFinanceCheckout\Sdk\Model\RefundCreate;
 use PostFinanceCheckout\Sdk\Model\RefundType;
 use PostFinanceCheckout\Sdk\Model\RefundState;
 use PostFinanceCheckout\Sdk\Service\RefundService;
+use PostFinanceCheckout\Sdk\Service\PaymentMethodConfigurationService;
+use PostFinanceCheckout\Sdk\Model\CreationEntityState;
+use PostFinanceCheckout\Sdk\Model\CriteriaOperator;
+use PostFinanceCheckout\Sdk\Model\EntityQuery;
+use PostFinanceCheckout\Sdk\Model\EntityQueryFilter;
+use PostFinanceCheckout\Sdk\Model\EntityQueryFilterType;
 
 class Gateway extends BaseGateway
 {
@@ -57,6 +63,11 @@ class Gateway extends BaseGateway
      */
     public function getPaymentFormHtml(array $params)
     {
+        $params = [
+            'gateway' => $this,
+            'paymentForm' => $this->getPaymentFormModel(),
+        ];
+
         $view = Craft::$app->getView();
 
         $previousMode = $view->getTemplateMode();
@@ -81,7 +92,7 @@ class Gateway extends BaseGateway
      */
     public function getPaymentFormModel(): BasePaymentForm
     {
-        return new OffsitePaymentForm();
+        return new PaymentPage;
     }
 
     /**
@@ -91,6 +102,28 @@ class Gateway extends BaseGateway
     {
         // Setup API client
         $client = new ApiClient($this->userId, $this->secretKey);
+
+        //get payment Method configureation
+        $paymentMethodConfigService = new PaymentMethodConfigurationService($client);
+        $paymentMethod = $paymentMethodConfigService->search($this->spaceId, new EntityQuery([
+            'filter' => new EntityQueryFilter([
+                'type' => EntityQueryFilterType::_AND,
+                'children' => [
+                    new EntityQueryFilter([
+                        'field_name' => 'name',
+                        'value' => $form['paymentMethod'],
+                        'type' => EntityQueryFilterType::LEAF,
+                        'operator' => CriteriaOperator::EQUALS_IGNORE_CASE,
+                    ]),
+                    new EntityQueryFilter([
+                        'field_name' => 'state',
+                        'value' => CreationEntityState::ACTIVE,
+                        'type' => EntityQueryFilterType::LEAF,
+                        'operator' => CriteriaOperator::EQUALS,
+                    ]),
+                ]
+            ])
+        ]));
 
         // Create Line Item
         $lineItemData = [
@@ -102,19 +135,22 @@ class Gateway extends BaseGateway
         ];
         $lineItem = new LineItemCreate($lineItemData);
         if (!$lineItem->valid()) {
-            return new PostfinanceResponse(['message' => 'Invalid product']);
+            return new PostfinanceResponse(['message' => 'line Item is Invalid']);
         }
 
         // Create Transaction
         $transactionPayload = new TransactionCreate();
         $transactionPayload->setCurrency($transaction->paymentCurrency);
+        if (!empty($paymentMethod[0])) {
+            $transactionPayload->setAllowedPaymentMethodConfigurations($paymentMethod[0]->getId());
+        }
         $transactionPayload->setLineItems($lineItem);
         $transactionPayload->setAutoConfirmationEnabled(true);
         $transactionPayload->setSuccessUrl(UrlHelper::actionUrl('commerce/payments/complete-payment', ['commerceTransactionId' => $transaction->id, 'commerceTransactionHash' => $transaction->hash]));
         $transactionPayload->setFailedUrl($transaction->getOrder()->cancelUrl);
         $transactionService = $client->getTransactionService()->create($this->spaceId, $transactionPayload);
 
-        // Create Payment Page URL:
+        // Create Payment Page URL
         $redirectionUrl = $client->getTransactionPaymentPageService()->paymentPageUrl($this->spaceId, $transactionService->getId());
         $response = new PostfinanceResponse(['id' => $transactionService->getId()]);
         $response->setRedirectUrl($redirectionUrl);
@@ -162,9 +198,9 @@ class Gateway extends BaseGateway
             // Check amount is refundable
             $refundableAmount = $originTransaction->getAuthorizationAmount() - $originTransaction->getRefundedAmount();
             if ($transaction->paymentAmount > $refundableAmount) {
-                return new PostfinanceResponse(['message' => 'The refund amount cannot exceed the refundable amount ' . $refundableAmount]);
+                return new PostfinanceResponse(['message' => 'provided amount cannot exceed the total line item amount of ' . $refundableAmount]);
             }
-            
+
             //refund payload
             $refundPayload = new RefundCreate();
             $refundPayload->setAmount($transaction->paymentAmount);
