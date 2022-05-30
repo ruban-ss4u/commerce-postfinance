@@ -1,9 +1,18 @@
-.payment-methods input {
-    width: 50px !important;
+.gateway-payment-form .payment-methods li {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    column-gap: 20px;
+    margin-bottom: 25px;
 }
-.logo {
+.payment-methods input {
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+.payment_card_img {
     display: inline;
-    width: 45px;
-    height:25px;
+    width: 55px;
     object-fit: cover;
+    box-shadow: rgb(99 99 99 / 20%) 0px 2px 8px 2px;
 }
