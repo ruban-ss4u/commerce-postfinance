@@ -287,6 +287,7 @@ class Gateway extends BaseGateway
             case 'Refund':
                 $service = new \PostFinanceCheckout\Sdk\Service\RefundService($client);
                 $pfRefund = $service->read($this->spaceId, $data['entityId']);
+                $childTransaction->parentId = $originTransaction->parentId;
                 switch ($pfRefund->getState()) {
                     case RefundState::SUCCESSFUL:
                         $childTransaction->status = TransactionRecord::STATUS_SUCCESS;
