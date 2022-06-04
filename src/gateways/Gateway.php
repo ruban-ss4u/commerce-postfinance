@@ -3,6 +3,7 @@
 namespace craft\commerce\postfinance\gateways;
 
 use Craft;
+use Exception;
 use craft\commerce\base\Gateway as BaseGateway;
 use craft\commerce\base\RequestResponseInterface;
 use craft\commerce\models\payments\BasePaymentForm;
@@ -62,7 +63,7 @@ class Gateway extends BaseGateway
     /**
      * @inheritdoc
      */
-    public function getPaymentFormHtml(array $params)
+    public function getPaymentFormHtml(array $params): ?string
     {
         $view = Craft::$app->getView();
 
@@ -84,7 +85,7 @@ class Gateway extends BaseGateway
     /**
      * @inheritdoc
      */
-    public function getSettingsHtml()
+    public function getSettingsHtml(): ?string
     {
         return Craft::$app->getView()->renderTemplate('commerce-postfinance/settings', ['gateway' => $this]);
     }
@@ -169,15 +170,6 @@ class Gateway extends BaseGateway
         $transactionService = new TransactionService($apiClient);
         $result = $transactionService->read($this->spaceId, $transaction->reference);
         $status = $result->getState();
-        $startTime = microtime(true);
-        $maxWaitTime = 30;
-
-        while (in_array($status, [TransactionState::AUTHORIZED, TransactionState::COMPLETED]) && microtime(true) <= $startTime + $maxWaitTime) {
-            $result = $transactionService->read($this->spaceId, $transaction->reference);
-            $status = $result->getState();
-            sleep(1);
-        }
-
         $response = new PostfinanceResponse(['id' => $result->getId(), 'status' => $status]);
         $response->setProcessing(true);
         return $response;
@@ -188,21 +180,15 @@ class Gateway extends BaseGateway
      */
     public function refund(Transaction $transaction): RequestResponseInterface
     {
-        // Services
-        $apiClient = new ApiClient($this->userId, $this->secretKey);
-        $transactionService = new TransactionService($apiClient);
-        $refundService = new RefundService($apiClient);
+        try {
+            // Services
+            $apiClient = new ApiClient($this->userId, $this->secretKey);
+            $transactionService = new TransactionService($apiClient);
+            $refundService = new RefundService($apiClient);
 
-        //Fetch the origin transaction
-        $originTransaction = $transactionService->read($this->spaceId, $transaction->reference);
-     
-        if (in_array($originTransaction->getState(), [TransactionState::FULFILL])) {
-            // Check amount is refundable
-            $refundableAmount = $originTransaction->getAuthorizationAmount() - $originTransaction->getRefundedAmount();
-            if ($transaction->paymentAmount > $refundableAmount) {
-                return new PostfinanceResponse(['message' => 'provided amount cannot exceed the total line item amount of ' . $refundableAmount]);
-            }
-
+            //Fetch the origin transaction
+            $originTransaction = $transactionService->read($this->spaceId, $transaction->reference);
+            
             //refund payload
             $refundPayload = new RefundCreate();
             $refundPayload->setAmount($transaction->paymentAmount);
@@ -217,9 +203,9 @@ class Gateway extends BaseGateway
             $response = new PostfinanceResponse($responseData);
             $response->setProcessing($isRefundPending ? true : false);
             return $response;
+        } catch (Exception $exception) {
+            return new PostfinanceResponse(['message' => $exception->getResponseBody()->message]);
         }
-        $response = new PostfinanceResponse();
-        return $response;
     }
 
     /**
@@ -252,7 +238,7 @@ class Gateway extends BaseGateway
      * @param array $data
      * @throws TransactionException
      */
-    public function handleWebhook(array $data)
+    public function handleWebhook(array $data): void
     {
         $reference = $data['entityId'];
         $transactionType = $data['listenerEntityTechnicalName'];
@@ -305,7 +291,7 @@ class Gateway extends BaseGateway
     /**
      * @inheritdoc
      */
-    public function getTransactionHashFromWebhook()
+    public function getTransactionHashFromWebhook(): ?string
     {
         $rawData = Craft::$app->getRequest()->getRawBody();
         $webhookData = Json::decodeIfJson($rawData);
